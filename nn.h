@@ -2,6 +2,9 @@
 #include <lib/Eigen/Dense>
 #include <cmath>  
 #include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <random>
 
 using namespace std;
 using namespace Eigen;
@@ -10,8 +13,8 @@ MatrixXd sigmoid(const MatrixXd& Z);
 MatrixXd sigmoid_prime(const MatrixXd& Z);
 MatrixXd relu(const MatrixXd& Z);
 MatrixXd relu_prime(const MatrixXd& Z);
-
-
+double rand_uniform(double min, double max);
+int rand_int(int lo, int hi);
 
 class NeuralNetwork
 {
@@ -19,14 +22,14 @@ class NeuralNetwork
         int inp;
         int hid;
         int out;
-        float lr = 0.1; //learning rate
+        double lr = 0.1; //learning rate
 
-        MatrixXd inputs, outputs, hidden, inputs_T, hidden_T, E_out, E_hid;
+        MatrixXd inputs, outputs, hidden, target, inputs_T, hidden_T, E_out, E_hid;
         MatrixXd W_IH, W_HO,W_HO_T, W_HO_D, W_IH_D;
         MatrixXd B_H, B_O;
 
         NeuralNetwork(int inp, int hid, int out, float lr){
-            
+            std::srand((unsigned)std::time(nullptr)); 
             this->inp = inp;
             this->hid = hid;
             this->out = out;
@@ -35,12 +38,20 @@ class NeuralNetwork
             inputs.resize(inp,1);
             outputs.resize(out,1);
             hidden.resize(hid,1);
+            target.resize(out,1);
+
 
             W_IH.resize(hid, inp);
             W_HO.resize(out, hid);
             
+            W_IH = 0.5 * MatrixXd::Random(hid, inp);  
+            W_HO = 0.5 * MatrixXd::Random(out, hid);  
+
             B_O.resize(out, 1);
             B_H.resize(hid, 1);
+            B_H = MatrixXd::Zero(hid, 1);
+            B_O = MatrixXd::Zero(out, 1);
+
 
         }
 
@@ -79,11 +90,12 @@ class NeuralNetwork
             W_IH_D = lr * E_hid * inputs_T;
 
             // Adding the deltas with Weights
-            W_HO = W_HO + W_HO_D;
-            W_IH = W_IH + W_IH_D;
+            W_HO += W_HO_D;
+            W_IH += W_IH_D;
 
-
-            cout<<E_out<<endl;
+            // Adjusting biases
+            B_O += lr * E_out;
+            B_H += lr * E_hid;
 
         }
 };
@@ -102,8 +114,13 @@ MatrixXd sigmoid(const MatrixXd& Z) {
         return 1.0 / (1.0 + exp(-x));  
     });
 }
+MatrixXd sigmoid_prime(const MatrixXd& A) {
+    return A.array() * (1.0 - A.array());   // assumes A = sigmoid(Z)
+}
 
-MatrixXd sigmoid_prime(const MatrixXd& Z) {
-    MatrixXd S = sigmoid(Z);
-    return S.array() * (1.0 - S.array());
+
+int rand_int(int lo, int hi) {
+    static thread_local std::mt19937 rng{std::random_device{}()};
+    std::uniform_int_distribution<int> dist(lo, hi);  // inclusive [web:365]
+    return dist(rng);
 }
