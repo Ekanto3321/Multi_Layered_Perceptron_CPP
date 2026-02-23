@@ -3,15 +3,12 @@
 int input = 2;
 int hidden = 3;
 int output = 2;
+int learning_rate = 0.1;
 
 int main() {
-    // Matrix <float, 3,3> mat;
 
-    // mat.setZero();
 
-    // cout<<mat<<endl;
-
-    NeuralNetwork nn(input,hidden,output);
+    NeuralNetwork nn(input,hidden,output, learning_rate);
 
     nn.hidden << 1,2,3;
     nn.inputs << 1,2;
@@ -19,7 +16,7 @@ int main() {
     nn.W_HO << 1, 2, 3, 4,5,6; 
     MatrixXd target;
     target.resize(output, 1);
-    target<< 78,177;
+    target<< 1,1;
 
     cout<<"W_HO:\n"<<nn.W_HO<<endl<<"W_IH\n"<<nn.W_IH<<endl;
     cout<<"outputs\n"<<nn.think(nn.inputs)<<endl;

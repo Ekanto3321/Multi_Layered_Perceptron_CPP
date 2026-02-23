@@ -11,7 +11,6 @@ MatrixXd sigmoid_prime(const MatrixXd& Z);
 MatrixXd relu(const MatrixXd& Z);
 MatrixXd relu_prime(const MatrixXd& Z);
 
-float learning_rate = 0.1;
 
 
 class NeuralNetwork
@@ -20,16 +19,18 @@ class NeuralNetwork
         int inp;
         int hid;
         int out;
+        float lr = 0.1; //learning rate
 
-        MatrixXd inputs, outputs, hidden, E_out, E_hid;
-        MatrixXd W_IH, W_HO,W_HO_T;
+        MatrixXd inputs, outputs, hidden, inputs_T, hidden_T, E_out, E_hid;
+        MatrixXd W_IH, W_HO,W_HO_T, W_HO_D, W_IH_D;
         MatrixXd B_H, B_O;
 
-        NeuralNetwork(int inp, int hid, int out){
+        NeuralNetwork(int inp, int hid, int out, float lr){
             
             this->inp = inp;
             this->hid = hid;
             this->out = out;
+            this->lr = lr;
             
             inputs.resize(inp,1);
             outputs.resize(out,1);
@@ -48,25 +49,39 @@ class NeuralNetwork
             hidden = W_IH*inputs;
             hidden = hidden+B_H;
 
-            hidden = relu(hidden);
+            hidden = sigmoid(hidden);
 
             outputs = W_HO*hidden;
             outputs = outputs+B_O;
 
-            outputs = relu(outputs);
+            outputs = sigmoid(outputs);
 
             return outputs;
         }
 
         void train(MatrixXd &inputs, MatrixXd &target){
 
+            // output errors
             outputs = think(inputs);
-            E_out = (target-outputs).array().square();
-            // E_out = (target-outputs);
-            
+            E_out = (target - outputs).array();
+            E_out = E_out.array() * sigmoid_prime(outputs).array();
+        
+            // hidden errors
             W_HO_T = W_HO.transpose();
+            E_hid = (W_HO_T * E_out).array() * sigmoid_prime(hidden).array();
 
-            E_hid = W_HO_T * E_out;
+            // find amounts to adjust weights
+            hidden_T = hidden.transpose();
+            inputs_T = inputs.transpose();
+            // output weights
+            W_HO_D = lr * E_out * hidden_T;
+            // hidden weights
+            W_IH_D = lr * E_hid * inputs_T;
+
+            // Adding the deltas with Weights
+            W_HO = W_HO + W_HO_D;
+            W_IH = W_IH + W_IH_D;
+
 
             cout<<E_out<<endl;
 
