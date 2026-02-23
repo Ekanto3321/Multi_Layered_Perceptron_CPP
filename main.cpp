@@ -10,8 +10,6 @@ MatrixXd data_inp;
 MatrixXd data_t;
 
 int main() {
-
-
   
     NeuralNetwork nn(input, hidden, output, learning_rate);
     
@@ -19,18 +17,6 @@ int main() {
     data_t.resize(4,1);
     data_inp << 0,0, 0,1, 1,0, 1,1;
     data_t << 0, 1, 1, 0;
-
-
-    // nn.inputs = data_inp.row(0).transpose();
-
-
-    // // nn.hidden << 1,2,3;
-    // nn.inputs << 1,2;
-    // MatrixXd target;
-    // target.resize(output, 1);
-    // target<< 1;
-
-
 
     cout<<"before train"<<endl;
     cout<<"Weights:\nW_IH\n"<<nn.W_IH<<"\nW_H\n"<<nn.W_HO<<endl; 

@@ -100,19 +100,8 @@ class NeuralNetwork
         }
 };
 
-MatrixXd relu(const MatrixXd& Z) {
-    return Z.array().max(0.0);
-}
-MatrixXd relu_prime(const MatrixXd& Z) {
-    return (Z.array() > 0.0).cast<double>();
-}
-
 MatrixXd sigmoid(const MatrixXd& Z) {
-    return Z.array().unaryExpr([](double x) {
-        if (x > 45.0) return 1.0;
-        if (x < -45.0) return 0.0;
-        return 1.0 / (1.0 + exp(-x));  
-    });
+    return (1.0 / (1.0 + (-Z.array()).exp())).matrix();
 }
 MatrixXd sigmoid_prime(const MatrixXd& A) {
     return A.array() * (1.0 - A.array());   // assumes A = sigmoid(Z)
