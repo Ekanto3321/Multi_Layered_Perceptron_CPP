@@ -5,14 +5,17 @@
 #include <cstdlib>
 #include <ctime>
 #include <random>
+#include <fstream>
+#include <cstdint>
+#include <array>
+#include <string>
+#include <stdexcept>
 
 using namespace std;
 using namespace Eigen;
 
 MatrixXd sigmoid(const MatrixXd& Z);
 MatrixXd sigmoid_prime(const MatrixXd& Z);
-MatrixXd relu(const MatrixXd& Z);
-MatrixXd relu_prime(const MatrixXd& Z);
 double rand_uniform(double min, double max);
 int rand_int(int lo, int hi);
 
